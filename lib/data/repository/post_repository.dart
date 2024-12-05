@@ -1,30 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../model/post.dart';
+import 'package:flutter_firebase_blog_app/data/model/post.dart';
 
 class PostRepository {
-  Future<List<Post>?> getAll() async {
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final CollectionRef = firestore.collection('post');
-      final result = await CollectionRef.get();
+  final _postCollection = FirebaseFirestore.instance.collection('posts');
 
-      final docs = result.docs;
-      return docs.map((doc) {
-        final map = doc.data();
-        doc.id;
-        final newMap = {
-          'id': doc.id,
-          ...map,
-        };
-        return Post.fromJson(newMap);
+  // 모든 게시물 스트림 가져오기
+  Stream<List<Post>> postListStream() {
+    return _postCollection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id; // ID 추가
+        return Post.fromJson(data);
       }).toList();
-    } catch (e) {
-      print(e);
-      return null;
-    }
+    });
   }
 
+  // 단일 게시물 스트림 가져오기
+  Stream<Post?> postStream(String id) {
+    return _postCollection.doc(id).snapshots().map((doc) {
+      if (doc.exists) {
+        final data = doc.data()!;
+        data['id'] = doc.id;
+        return Post.fromJson(data);
+      }
+      return null;
+    });
+  }
+
+  // 게시물 추가
   Future<bool> insert({
     required String title,
     required String content,
@@ -32,39 +35,21 @@ class PostRepository {
     required String imageUrl,
   }) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final collectionRef = firestore.collection('posts');
-      final docRef = collectionRef.doc();
-      await docRef.set({
+      await _postCollection.add({
         'title': title,
         'content': content,
         'writer': writer,
         'imageUrl': imageUrl,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': FieldValue.serverTimestamp(),
       });
       return true;
     } catch (e) {
-      print(e);
+      print('Error inserting post: $e');
       return false;
     }
   }
 
-  Future<Post?> getOne(String id) async {
-    try {
-      final firestore = FirebaseFirestore.instance;
-      final collectionRef = firestore.collection('post');
-      final docRef = collectionRef.doc();
-      final doc = await docRef.get();
-      return Post.fromJson({
-        'id': doc.id,
-        ...doc.data()!,
-      });
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
+  // 게시물 수정
   Future<bool> update({
     required String id,
     required String title,
@@ -73,67 +58,28 @@ class PostRepository {
     required String imageUrl,
   }) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final collectionRef = firestore.collection('posts');
-      final docRef = collectionRef.doc();
-      await docRef.update({
+      await _postCollection.doc(id).update({
         'title': title,
         'content': content,
         'writer': writer,
         'imageUrl': imageUrl,
+        'updatedAt': FieldValue.serverTimestamp(),
       });
       return true;
     } catch (e) {
-      print(e);
+      print('Error updating post: $e');
       return false;
     }
   }
 
+  // 게시물 삭제
   Future<bool> delete(String id) async {
     try {
-      final firestore = FirebaseFirestore.instance;
-      final collectionRef = firestore.collection('posts');
-      final docRef = collectionRef.doc();
-      await docRef.delete();
+      await _postCollection.doc(id).delete();
       return true;
     } catch (e) {
-      print(e);
+      print('Error deleting post: $e');
       return false;
     }
-  }
-
-  Stream<List<Post>> postListStream() {
-    final firestore = FirebaseFirestore.instance;
-    final collectionRef =
-        firestore.collection('post').orderBy('createdAt', descending: true);
-    final stream = collectionRef.snapshots();
-    final newStream = stream.map(
-      (event) {
-        return event.docs.map((e) {
-          return Post.fromJson({
-            'id': e.id,
-            ...e.data(),
-          });
-        }).toList();
-      },
-    );
-    return newStream;
-  }
-
-  Stream<Post?> postStream(String id) {
-    final firestore = FirebaseFirestore.instance;
-    final collectionRef = firestore.collection('post');
-    final docRef = collectionRef.doc(id);
-    final stream = docRef.snapshots();
-    final newStream = stream.map((e) {
-      if (e.data() == null) {
-        return null;
-      }
-      return Post.fromJson({
-        'id': e.id,
-        ...e.data()!,
-      });
-    });
-    return newStream;
   }
 }

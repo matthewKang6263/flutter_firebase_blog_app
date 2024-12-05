@@ -1,29 +1,32 @@
-import 'dart:async';
 import 'package:flutter_firebase_blog_app/data/model/post.dart';
 import 'package:flutter_firebase_blog_app/data/repository/post_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeViewModel extends StateNotifier<List<Post>> {
-  HomeViewModel() : super([]) {
-    getAllPosts();
+  HomeViewModel(this._postRepository) : super([]) {
+    _loadPosts();
   }
 
-  final PostRepository _postRepository = PostRepository();
+  final PostRepository _postRepository;
 
-  Future<void> getAllPosts() async {
-    try {
-      final stream = _postRepository.postListStream();
-      await for (final posts in stream) {
+  // 게시물 로드
+  void _loadPosts() {
+    _postRepository.postListStream().listen(
+      (posts) {
         state = posts;
-      }
-    } catch (e) {
-      print('Error fetching posts: $e');
-      state = [];
-    }
+      },
+      onError: (error) {
+        print('Error loading posts: $error');
+        state = [];
+      },
+    );
   }
 }
 
+final postRepositoryProvider = Provider((ref) => PostRepository());
+
 final homeViewModelProvider =
     StateNotifierProvider<HomeViewModel, List<Post>>((ref) {
-  return HomeViewModel();
+  final postRepository = ref.watch(postRepositoryProvider);
+  return HomeViewModel(postRepository);
 });

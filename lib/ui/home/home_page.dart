@@ -10,6 +10,7 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // HomeViewModel의 상태를 관찰합니다.
     final posts = ref.watch(homeViewModelProvider);
 
     return Scaffold(
@@ -18,6 +19,7 @@ class HomePage extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // 새 게시물 작성 페이지로 이동
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => WritePage(null)),
@@ -55,9 +57,11 @@ class HomePage extends ConsumerWidget {
     );
   }
 
+  // 게시물 아이템 위젯
   Widget item(BuildContext context, Post post) {
     return GestureDetector(
       onTap: () {
+        // 상세 페이지로 이동
         Navigator.push(context, MaterialPageRoute(builder: (context) {
           return DetailPage(post);
         }));
@@ -97,24 +101,12 @@ class HomePage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    post.title,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(post.title,
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   Spacer(),
-                  Text(
-                    post.content,
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  Text(post.content, overflow: TextOverflow.ellipsis),
                   SizedBox(height: 4),
-                  Text(
-                    post.createdAt.toIso8601String(),
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
+                  Text(post.createdAt.toIso8601String()),
                 ],
               ),
             )
