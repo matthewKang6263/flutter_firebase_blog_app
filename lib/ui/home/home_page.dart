@@ -6,10 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_firebase_blog_app/ui/home/home_view_model.dart';
 
 class HomePage extends ConsumerWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final posts = ref.watch(homeViewModelProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text('BLOG'),
@@ -85,7 +86,7 @@ class HomePage extends ConsumerWidget {
             return DetailPage(post);
           }));
         },
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
           height: 120,
           child: Stack(

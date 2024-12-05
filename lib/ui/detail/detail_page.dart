@@ -5,7 +5,7 @@ import 'package:flutter_firebase_blog_app/ui/write/write_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DetailPage extends ConsumerWidget {
-  DetailPage(this.post);
+  DetailPage(this.post, {super.key});
   Post post;
 
   @override
@@ -14,10 +14,9 @@ class DetailPage extends ConsumerWidget {
     return Scaffold(
         appBar: AppBar(actions: [
           iconButton(Icons.delete, () async {
-            print('삭제 아이콘 터치함');
             final vm = ref.read(detailViewModelProvider(post).notifier);
             final result = await vm.deletePost();
-            if (result) {
+            if (context.mounted && result) {
               Navigator.pop(context);
             }
           }),

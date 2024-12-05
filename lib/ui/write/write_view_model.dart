@@ -11,7 +11,7 @@ class WriteState {
   WriteState(this.isWriting, this.imageUrl);
 }
 
-class WirteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
+class WriteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
   @override
   WriteState build(Post? arg) {
     return WriteState(false, arg?.imageUrl);
@@ -35,7 +35,7 @@ class WirteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
           writer: writer,
           imageUrl: state.imageUrl!);
       state = WriteState(false, state.imageUrl);
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return result;
     } else {
       final result = await postRepository.update(
@@ -45,7 +45,7 @@ class WirteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
           writer: writer,
           imageUrl: state.imageUrl!);
       state = WriteState(false, state.imageUrl);
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       return result;
     }
   }
@@ -66,6 +66,6 @@ class WirteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
 }
 
 final writeViewModelProvider =
-    NotifierProvider.autoDispose.family<WirteViewModel, WriteState, Post?>(() {
-  return WirteViewModel();
+    NotifierProvider.autoDispose.family<WriteViewModel, WriteState, Post?>(() {
+  return WriteViewModel();
 });

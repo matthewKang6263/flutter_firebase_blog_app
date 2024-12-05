@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_blog_app/data/model/post.dart';
-import 'package:flutter_firebase_blog_app/ui/write/wirte_view_model.dart';
+import 'package:flutter_firebase_blog_app/ui/write/write_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 class WritePage extends ConsumerStatefulWidget {
-  WritePage(this.post);
+  WritePage(this.post, {super.key});
   Post? post;
 
   @override
@@ -50,7 +50,6 @@ class _WritePageState extends ConsumerState<WritePage> {
             actions: [
               GestureDetector(
                 onTap: () async {
-                  print('object');
                   final result = formKey.currentState?.validate() ?? false;
                   if (result) {
                     final insertResult = await vm.insert(
