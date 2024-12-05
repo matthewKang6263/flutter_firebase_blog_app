@@ -36,7 +36,31 @@ class HomePage extends ConsumerWidget {
             SizedBox(height: 20),
             Expanded(
               child: posts.isEmpty
-                  ? Center(child: CircularProgressIndicator())
+                  ? FutureBuilder(
+                      future: Future.delayed(Duration(seconds: 5)),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('데이터를 불러오지 못했습니다.'),
+                                SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    ref.refresh(homeViewModelProvider);
+                                  },
+                                  child: Text('새로고침'),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    )
                   : ListView.separated(
                       itemCount: posts.length,
                       separatorBuilder: (context, index) =>
@@ -75,6 +99,12 @@ class HomePage extends ConsumerWidget {
                   child: Image.network(
                     post.imageUrl,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey[300],
+                        child: Icon(Icons.error),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -94,14 +124,21 @@ class HomePage extends ConsumerWidget {
                       post.title,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Spacer(),
-                    Text(post.content,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      post.content,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      maxLines: 2,
+                    ),
                     SizedBox(height: 4),
-                    Text(post.createdAt.toIso8601String(),
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      post.createdAt.toIso8601String(),
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
               )
