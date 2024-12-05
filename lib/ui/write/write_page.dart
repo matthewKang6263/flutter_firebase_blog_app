@@ -71,87 +71,54 @@ class _WritePageState extends ConsumerState<WritePage> {
                 height: 50,
                 color: Colors.transparent,
                 alignment: Alignment.center,
-                child: Text(
-                  '완료',
-                  style: TextStyle(
-                      color: Colors.blue, fontWeight: FontWeight.bold),
-                ),
+                child:
+                    Text('완료', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
               ),
             )
           ],
         ),
-        body: Form(
-          key: formKey,
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            children: [
-              TextFormField(
-                controller: writeController,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(hintText: '작성자'),
-                validator: (value) {
-                  if (value?.trim().isEmpty ?? true) {
-                    return '작성자를 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: titleController,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(hintText: '제목'),
-                validator: (value) {
-                  if (value?.trim().isEmpty ?? true) {
-                    return '제목을 입력해주세요';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(
-                height: 200,
-                child: TextFormField(
-                  controller: contentController,
-                  maxLines: null,
-                  expands: true,
-                  textInputAction: TextInputAction.newline,
-                  decoration: InputDecoration(hintText: '내용'),
-                  validator: (value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return '내용을 입력해주세요';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () async {
-                    ImagePicker imagePicker = ImagePicker();
-                    XFile? xFile = await imagePicker.pickImage(
-                        source: ImageSource.gallery);
-                    if (xFile != null) {
-                      await vm.uploadImage(xFile);
-                    }
-                  },
-                  child: writeState.imageUrl == null
-                      ? Container(
-                          width: 100,
-                          height: 100,
-                          color: Colors.grey,
-                          child: Icon(Icons.image),
-                        )
-                      : SizedBox(
-                          height: 100,
-                          child: Image.network(writeState.imageUrl!),
-                        ),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+        body:
+            Form(key: formKey, child:
+            ListView(padding:
+            EdgeInsets.symmetric(horizontal:
+            20), children:[
+              TextFormField(controller:
+              writeController, textInputAction:
+              TextInputAction.done, decoration:
+              InputDecoration(hintText:'작성자'), validator:(value){
+                if(value?.trim().isEmpty ?? true){
+                  return'작성자를 입력해주세요';}return null;},),
+               TextFormField(controller:titleController,textInputAction:
+               TextInputAction.done,decoration:
+               InputDecoration(hintText:'제목'),validator:(value){
+                 if(value?.trim().isEmpty ?? true){
+                   return'제목을 입력해주세요';}return null;},),
+               SizedBox(height:
+               200,child:
+               TextFormField(controller:
+               contentController,maxLines:null,expands:true,textInputAction:
+               TextInputAction.newline,decoration:
+               InputDecoration(hintText:'내용'),validator:(value){
+                 if(value?.trim().isEmpty ?? true){
+                   return'내용을 입력해주세요';}return null;},),),
+               SizedBox(height:
+               20,),
+               Align(alignment:
+               Alignment.centerRight,child:
+               GestureDetector(onTap:
+               () async{
+                 ImagePicker imagePicker =
+                 ImagePicker();XFile? xFile =
+                 await imagePicker.pickImage(source:
+                 ImageSource.gallery);if(xFile != null){
+                   await vm.uploadImage(xFile);}},child:
+                   writeState.imageUrl == null ?Container(width:
+                   100,height:
+                   100,color:
+                   Colors.grey,child:
+                   Icon(Icons.image),):SizedBox(height:
+                   100,child:
+                   Image.network(writeState.imageUrl!)),),)
+             ],),),);
+   }
 }
