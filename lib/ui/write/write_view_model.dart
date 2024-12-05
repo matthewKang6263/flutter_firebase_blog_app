@@ -6,66 +6,91 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 class WriteState {
-  bool isWriting;
-  String? imageUrl;
-  WriteState(this.isWriting, this.imageUrl);
+  final bool isWriting;
+  final String? imageUrl;
+  final String title;
+  final String content;
+
+  WriteState({
+    required this.isWriting,
+    this.imageUrl,
+    required this.title,
+    required this.content,
+  });
+
+  WriteState copyWith({
+    bool? isWriting,
+    String? imageUrl,
+    String? title,
+    String? content,
+  }) {
+    return WriteState(
+      isWriting: isWriting ?? this.isWriting,
+      imageUrl: imageUrl ?? this.imageUrl,
+      title: title ?? this.title,
+      content: content ?? this.content,
+    );
+  }
 }
 
-class WriteViewModel extends AutoDisposeFamilyNotifier<WriteState, Post?> {
-  @override
-  WriteState build(Post? arg) {
-    return WriteState(false, arg?.imageUrl);
+class WriteViewModel extends StateNotifier<WriteState> {
+  WriteViewModel(Post? post)
+      : super(WriteState(
+            isWriting: false,
+            title: post?.title ?? '',
+            content: post?.content ?? ''));
+
+  final PostRepository _postRepository = PostRepository();
+
+  void updateTitle(String title) {
+    state = state.copyWith(title: title);
   }
 
-  Future<bool> insert({
-    required String writer,
-    required String title,
-    required String content,
-  }) async {
-    if (state.imageUrl == null) {
+  void updateContent(String content) {
+    state = state.copyWith(content: content);
+  }
+
+  Future<bool> insert({required String writer}) async {
+    if (state.imageUrl == null) return false;
+
+    state = state.copyWith(isWriting: true);
+
+    try {
+      final result = await _postRepository.insert(
+        title: state.title,
+        content: state.content,
+        writer: writer,
+        imageUrl: state.imageUrl!,
+      );
+      state = state.copyWith(isWriting: false);
+      return result;
+    } catch (e) {
+      print('Error inserting post: $e');
+      state = state.copyWith(isWriting: false);
       return false;
     }
-    final postRepository = PostRepository();
-
-    state = WriteState(true, state.imageUrl);
-    if (arg == null) {
-      final result = await postRepository.insert(
-          title: title,
-          content: content,
-          writer: writer,
-          imageUrl: state.imageUrl!);
-      state = WriteState(false, state.imageUrl);
-      await Future.delayed(const Duration(milliseconds: 500));
-      return result;
-    } else {
-      final result = await postRepository.update(
-          id: arg!.id,
-          title: title,
-          content: content,
-          writer: writer,
-          imageUrl: state.imageUrl!);
-      state = WriteState(false, state.imageUrl);
-      await Future.delayed(const Duration(milliseconds: 500));
-      return result;
-    }
   }
 
-  void uploadImage(XFile xFile) async {
+  Future<void> uploadImage(XFile xFile) async {
     try {
       final storage = FirebaseStorage.instance;
       Reference ref = storage.ref();
       Reference fileRef =
           ref.child('${DateTime.now().microsecondsSinceEpoch}_${xFile.name}');
+
       await fileRef.putFile(File(xFile.path));
+
       String imageUrl = await fileRef.getDownloadURL();
-      state = WriteState(state.isWriting, imageUrl);
+
+      state = state.copyWith(imageUrl: imageUrl);
     } catch (e) {
-      print(e);
+      print('Error uploading image: $e');
     }
   }
 }
 
 final writeViewModelProvider =
-    NotifierProvider.autoDispose.family<WriteViewModel, WriteState, Post?>(() {
-  return WriteViewModel();
+    StateNotifierProvider.family<WriteViewModel, WriteState, Post?>(
+        (ref, post) {
+  return WriteViewModel(post);
 });
