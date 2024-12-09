@@ -17,18 +17,21 @@ class Post {
     required this.createdAt,
   });
 
-  // JSON에서 Post 객체로 변환
+  // Firestore 데이터(Map)를 Post 객체로 변환
   Post.fromJson(Map<String, dynamic> map)
       : this(
-          id: map['id'] ?? '',
+          id: map['id'] ?? '', // Firestore 문서 ID
           title: map['title'] ?? '',
           content: map['content'] ?? '',
           writer: map['writer'] ?? '',
           imageUrl: map['imageUrl'] ?? '',
-          createdAt: (map['createdAt'] as Timestamp).toDate(),
+          // createdAt 필드가 없거나 null인 경우 기본값 처리
+          createdAt: map['createdAt'] != null
+              ? (map['createdAt'] as Timestamp).toDate()
+              : DateTime.now(),
         );
 
-  // Post 객체를 JSON으로 변환
+  // Post 객체를 Firestore에 저장 가능한 JSON 형태로 변환
   Map<String, dynamic> toJson() {
     return {
       'id': id,
